@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  login-system-dev:
+    build: ..
+    image: login-system:development
+    container_name: "login-system-development"
+    restart: always
+    environment:
+      - FLASK_APP=login_system
+      - APP_MODE=development
+      - MYSQL_HOST=login-system-dev-db
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      # Filter out SQLAlchemy Deprecation warnings for the time being. There is a pull request to fix
+      #   this warning that is currently in the prerelease build of flask-sqlalchemy-3.0.0a1. Once this
+      #   build becomes stable, we should move to flask-sqlalchemy-3.0.0 and remove this
+      #   environment variable
+      #
+      #   Pull Request: https://github.com/pallets-eco/flask-sqlalchemy/pull/1087
+      - PYTHONWARNINGS=ignore::DeprecationWarning
+    depends_on:
+      - login-system-dev-db
+    ports:
+      - 0.0.0.0:12000:5000
+    entrypoint: ["bash", "start_application.sh", "dev"]
+    volumes:
+      - "..:/login_system"
+    networks:
+      - login-system-development-network
+
+  login-system-dev-db:
+    image: mysql
+    container_name: login-system-mysql-development
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=dev_password
+      - MYSQL_DATABASE=login_system
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_USER=login_system_worker
+      - MYSQL_PASSWORD=dev_password
+    volumes:
+      - "../db/development:/var/lib/mysql"
+    networks:
+      - login-system-development-network
+
+
+networks:
+  login-system-development-network:

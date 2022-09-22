@@ -1,0 +1,10 @@
+gunicorn
+flask
+flask_wtf
+wtforms
+wtforms[email]
+flask-sqlalchemy
+flask-login
+flask-migrate
+flask-mysqldb
+pyjwt
